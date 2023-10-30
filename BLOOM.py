@@ -4,6 +4,7 @@ from transformers import BloomTokenizerFast
 import torch
 from sys import argv
 import os
+import csv
 
 # command line args, narrative text file name, size of model -> defaults to 560m
 
@@ -145,7 +146,6 @@ def predict():
 
     filelist = os.listdir()
 
-    os.chdir('..')
 
     for i in range(1, len(filelist) // 2 + 1):
 
@@ -160,7 +160,9 @@ def predict():
             answers.append(''.join(f.readlines(2)).replace('\n', ''))
         f.close()
 
-    predfile = open("Preds.txt", "w")
+    os.chdir('..')
+
+    predfile = open(f"{filename}_{size}_Preds.txt", "w")
 
     for i in range(0, len(narratives)):
         prompt = narratives[i]
@@ -174,7 +176,7 @@ def predict():
         pred_full = tokenizer.decode(model.generate(inputs["input_ids"], max_length = length, num_beams = 2, no_repeat_ngram_size = 2, early_stopping = True)[0])
         pred = pred_full[pred_full.rfind(' '): ].strip()
         
-        preds.append(pred)
+        preds.append((prompt, questions[i], pred, answers[i]))
 
         if pred == answers[i]: accuracy += 1.0
 
@@ -190,5 +192,14 @@ def predict():
 
     print(f"Accuracy: {accuracy}", file=predfile)
     print(f"Accuracy: {accuracy}")
+
+    with open(f"{filename}_{size}_Preds.csv","w") as out:
+        csv_out=csv.writer(out)
+        csv_out.writerow(['Prompt', 'Cloze', 'Prediction', 'Answer'])
+        csv_out.writerows(preds)
+        csv_out.writerow(['Accuracy: ', {accuracy}])
+
+    # You can also do csv_out.writerows(data) instead of the for loop
+
 
 predict()

@@ -64,7 +64,7 @@ def processQuestion(question):
     counting_regex = r"(\d+) How many objects is (.*) carrying\?"
     lists_regex = r"(\d+) What is (.*) carrying\?"
 
-    regexes = [(two_supp_regex,2),(three_supp_regex,3),(yes_no_regex,6),(counting_regex,7),(lists_regex,8)]
+    regexes = [(one_supp_regex,1), (two_supp_regex,2)] # ,(three_supp_regex,3),(yes_no_regex,6),(counting_regex,7),(lists_regex,8)
 
     for r in regexes:
         regex = r[0]
@@ -72,28 +72,34 @@ def processQuestion(question):
         match = None
         match = re.search(regex, questionAnswer[0])
         if match:
-            if val == 2: # two supporting facts
+            if val == 1:
                 qNum = int(match.group(1)) - adjust
                 object = match.group(2)
                 questions = ((qNum, object))
-            elif val == 3: # three supporting facts
+            elif val == 2: # two supporting facts
+                qNum = int(match.group(1)) - adjust
                 object = match.group(2)
-                loc2 = match.group(3)
-                questions = ((object, loc2))
-            elif val == 6: # yes no 
-                lineNum = int(match.group(1)) - adjust
-                person = match.group(2).lower()
-                location = match.group(3).lower()
-                questions = ((person, location, lineNum))
-            elif val == 7: # counting
-                lineNum = int(match.group(1)) - adjust
-                person = match.group(2).lower()
-                questions = ((person, lineNum))
-            elif val == 8: # lists
-                lineNum = int(match.group(1)) - adjust
-                person = match.group(2).lower()
-                questions = ((person, lineNum))
-            if val == 2:
+                questions = ((qNum, object))
+            # elif val == 3: # three supporting facts
+            #     object = match.group(2)
+            #     loc2 = match.group(3)
+            #     questions = ((object, loc2))
+            # elif val == 6: # yes no 
+            #     lineNum = int(match.group(1)) - adjust
+            #     person = match.group(2).lower()
+            #     location = match.group(3).lower()
+            #     questions = ((person, location, lineNum))
+            # elif val == 7: # counting
+            #     lineNum = int(match.group(1)) - adjust
+            #     person = match.group(2).lower()
+            #     questions = ((person, lineNum))
+            # elif val == 8: # lists
+            #     lineNum = int(match.group(1)) - adjust
+            #     person = match.group(2).lower()
+            #     questions = ((person, lineNum))
+            if val == 1:
+                questionAnswer[0] = ('%s is in the' % questions[1])
+            elif val == 2:
                 questionAnswer[0] = ('The %s is located in the' % questions[1])
             adjust += 1
             break
