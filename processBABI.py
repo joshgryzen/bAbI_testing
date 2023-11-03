@@ -35,7 +35,7 @@ def process():
                 print(question[0], file=questionFile)
                 print(question[1], file=questionFile, end="")
                 seen += 1
-                if i == len(narrative) - 1:
+                if i == len(narrative) or seen == maxnarratives:
                     break
                 narrativeFile.close()
                 questionFile.close()
@@ -56,15 +56,15 @@ def processQuestion(question):
     
 
     adjust = 1
-
-    one_supp_regex = r"(\d) Where is (.*)\?"
-    two_supp_regex = r"(\d+) Where is the (.*)\?"
+    
+    one_supp_regex = r"(\d) Where is (\w+)\?"
+    two_supp_regex = r"(\d+) Where is the (\w+)\?"
     three_supp_regex = r"(\d+)? Where was the (.*) before the (.*)\?"
     yes_no_regex = r"(\d+) Is (.*) in the (.*)\?"
     counting_regex = r"(\d+) How many objects is (.*) carrying\?"
     lists_regex = r"(\d+) What is (.*) carrying\?"
 
-    regexes = [(one_supp_regex,1), (two_supp_regex,2)] # ,(three_supp_regex,3),(yes_no_regex,6),(counting_regex,7),(lists_regex,8)
+    regexes = [(one_supp_regex, 1), (two_supp_regex,2)] # ,(three_supp_regex,3),(yes_no_regex,6),(counting_regex,7),(lists_regex,8)
 
     for r in regexes:
         regex = r[0]
@@ -72,14 +72,16 @@ def processQuestion(question):
         match = None
         match = re.search(regex, questionAnswer[0])
         if match:
-            if val == 1:
+            if val == 1: # two supporting facts
                 qNum = int(match.group(1)) - adjust
                 object = match.group(2)
                 questions = ((qNum, object))
-            elif val == 2: # two supporting facts
+                questionAnswer[0] = ('%s is in the' % questions[1])
+            elif val == 2:
                 qNum = int(match.group(1)) - adjust
                 object = match.group(2)
                 questions = ((qNum, object))
+                questionAnswer[0] = ('The %s is located in the' % questions[1])
             # elif val == 3: # three supporting facts
             #     object = match.group(2)
             #     loc2 = match.group(3)
@@ -97,10 +99,7 @@ def processQuestion(question):
             #     lineNum = int(match.group(1)) - adjust
             #     person = match.group(2).lower()
             #     questions = ((person, lineNum))
-            if val == 1:
-                questionAnswer[0] = ('%s is in the' % questions[1])
-            elif val == 2:
-                questionAnswer[0] = ('The %s is located in the' % questions[1])
+                
             adjust += 1
             break
 
@@ -110,6 +109,11 @@ filename = os.path.basename(argv[1]).replace(".txt", "")
 
 with open(argv[1]) as f:
     narrative = f.readlines()
+
+try:
+    maxnarratives = int(argv[2])
+except:
+    maxnarratives = len(narrative)
 
 # GENERATE NARRATIVES
 if os.path.exists(filename):

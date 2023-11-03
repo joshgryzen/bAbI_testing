@@ -161,8 +161,9 @@ def predict():
         f.close()
 
     os.chdir('..')
+    os.chdir('predictions')
 
-    predfile = open(f"{filename}_{size}_Preds.txt", "w")
+    # predfile = open(f"{filename}_{size}_Preds.txt", "w")
 
     for i in range(0, len(narratives)):
         prompt = narratives[i]
@@ -180,9 +181,9 @@ def predict():
 
         if pred == answers[i]: accuracy += 1.0
 
-        print(f"Prompt {i + 1}\n{prompt}", file=predfile)
-        print(f"\nPrediction {i + 1}: {pred}", file=predfile)
-        print(f"Answer {i + 1}: {answers[i]}\n", file=predfile)
+        # print(f"Prompt {i + 1}\n{prompt}", file=predfile)
+        # print(f"\nPrediction {i + 1}: {pred}", file=predfile)
+        # print(f"Answer {i + 1}: {answers[i]}\n", file=predfile)
         
         print(f"Prompt {i + 1}\n{prompt}")
         print(f"\nPrediction {i + 1}: {pred}")
@@ -190,14 +191,14 @@ def predict():
 
     accuracy /= len(answers)
 
-    print(f"Accuracy: {accuracy}", file=predfile)
+    # print(f"Accuracy: {accuracy}", file=predfile)
     print(f"Accuracy: {accuracy}")
 
     with open(f"{filename}_{size}_Preds.csv","w") as out:
         csv_out=csv.writer(out)
         csv_out.writerow(['Prompt', 'Cloze', 'Prediction', 'Answer'])
         csv_out.writerows(preds)
-        csv_out.writerow(['Accuracy: ', {accuracy}])
+        # csv_out.writerow(['Accuracy: ', {accuracy}])
 
     # You can also do csv_out.writerows(data) instead of the for loop
 
