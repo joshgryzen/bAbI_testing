@@ -56,7 +56,7 @@ def processQuestion(question):
     
 
     adjust = 1
-    
+
     one_supp_regex = r"(\d) Where is (\w+)\?"
     two_supp_regex = r"(\d+) Where is the (\w+)\?"
     three_supp_regex = r"(\d+)? Where was the (.*) before the (.*)\?"
@@ -81,7 +81,7 @@ def processQuestion(question):
                 qNum = int(match.group(1)) - adjust
                 object = match.group(2)
                 questions = ((qNum, object))
-                questionAnswer[0] = ('The %s is located in the' % questions[1])
+                questionAnswer[0] = ('The %s is in the' % questions[1]) # The %s is located in the
             # elif val == 3: # three supporting facts
             #     object = match.group(2)
             #     loc2 = match.group(3)
