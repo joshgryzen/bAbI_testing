@@ -76,12 +76,12 @@ def processQuestion(question):
                 qNum = int(match.group(1)) - adjust
                 object = match.group(2)
                 questions = ((qNum, object))
-                questionAnswer[0] = ('%s is in the' % questions[1])
+                questionAnswer[0] = ('\nGiven the story above, %s is currently located in the' % questions[1])
             elif val == 2:
                 qNum = int(match.group(1)) - adjust
                 object = match.group(2)
                 questions = ((qNum, object))
-                questionAnswer[0] = ('The %s is in the' % questions[1]) # The %s is located in the
+                questionAnswer[0] = (f'Using the locations from the story, where is the {questions[1]} located? The {questions[1]} is located in the') # The %s is located in the || Where is the {questions[1]}? 
             # elif val == 3: # three supporting facts
             #     object = match.group(2)
             #     loc2 = match.group(3)

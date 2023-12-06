@@ -14,12 +14,11 @@ try:
 except:
     size = '560m'
 
-if not os.path.exists(filename):
-    command = "python processBABI.py %s" % argv[1]
-    os.system(command)
+command = "python processBABI.py %s 100" % argv[1]
+os.system(command)
 
-model = BloomForCausalLM.from_pretrained(f"bigscience/bloom-{size}")
-tokenizer = BloomTokenizerFast.from_pretrained(f"bigscience/bloom-{size}")
+model = BloomForCausalLM.from_pretrained(f"bigscience/bloomz-{size}")
+tokenizer = BloomTokenizerFast.from_pretrained(f"bigscience/bloomz-{size}")
 
 # Example usage with Beam Search
 '''
@@ -166,7 +165,8 @@ def predict():
     # predfile = open(f"{filename}_{size}_Preds.txt", "w")
 
     for i in range(0, len(narratives)):
-        prompt = narratives[i]
+        context = "The following is a story with characters moving to different locations. Assume the most recent location is the character's current location. "
+        prompt = context + narratives[i]
         question = questions[i]
 
         prompt += question
@@ -194,7 +194,7 @@ def predict():
     # print(f"Accuracy: {accuracy}", file=predfile)
     print(f"Accuracy: {accuracy}")
 
-    with open(f"{filename}_{size}_Preds.csv","w") as out:
+    with open(f"BLOOMZ{filename}_{size}_Preds.csv","w") as out:
         csv_out=csv.writer(out)
         csv_out.writerow(['Prompt', 'Cloze', 'Prediction', 'Answer'])
         csv_out.writerows(preds)
