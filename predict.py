@@ -15,7 +15,6 @@ parser.add_argument('-n', '--nsize', default=100, type=int, help="The maximum si
 parser.add_argument('-c', '--context', nargs='?', const=True, default=False, type=bool, help="Option to pass in additional context before each narrative. Default set to false")
 
 args = vars(parser.parse_args())
-print(args)
 # Process BABI file
 filename = os.path.basename(args["task"]).replace(".txt", "")
 
@@ -212,9 +211,12 @@ def predict():
     # print(f"Accuracy: {accuracy}", file=predfile)
     print(f"Accuracy: {accuracy}")
 
-    print(os.listdir())
-
     model_name = pred = args['model'][args['model'].rfind('/') + 1: ].strip()
+
+    if not os.path.exists(model_name):
+        os.mkdir(model_name)
+
+    os.chdir(model_name)
 
     fname = f"WITH_CONTEXT_{model_name}_{filename}_Preds.csv" if args['context'] else f"{model_name}_{filename}_Preds.csv"
 
