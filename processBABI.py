@@ -4,7 +4,7 @@ import configparser
 import re
 import shutil
 from sys import argv
-
+import argparse
 
 # Code modified from https://github.com/joelsare/web-tExplain/blob/main/tExplain-main/runbAbI.py
 
@@ -17,7 +17,19 @@ from sys import argv
 # 8 – Lists/Sets
 
 
-def process():
+def process(file, maxnarratives, context):
+
+    with open(file) as f:
+        narrative = f.readlines()
+
+    filename = os.path.basename(file).replace(".txt", "")
+
+    # GENERATE NARRATIVES
+    if os.path.exists(filename):
+        shutil.rmtree(filename)
+    os.mkdir(filename)
+    os.chdir(filename)
+
     i = 0
     current = 0
     narrativeName = "Narrative" + str(current + 1) + ".txt"
@@ -31,7 +43,7 @@ def process():
         if "?" in line:
             current += 1
             if seen < current:
-                question = processQuestion(line)
+                question = processQuestion(line, context)
                 print(question[0], file=questionFile)
                 print(question[1], file=questionFile, end="")
                 seen += 1
@@ -48,7 +60,7 @@ def process():
         else:
             print(re.sub("^\d+ ", "", line), file=narrativeFile, end="")
 
-def processQuestion(question):
+def processQuestion(question, context):
     # question = re.sub("^\d+ ", "", question)
     questionAnswer = question.split('?')
     questionAnswer[0] += '?'
@@ -76,12 +88,21 @@ def processQuestion(question):
                 qNum = int(match.group(1)) - adjust
                 object = match.group(2)
                 questions = ((qNum, object))
-                questionAnswer[0] = ('\nGiven the story above, %s is currently located in the' % questions[1])
+                if(context):
+                    # The following is a narrative with characters moving to different locations. Assume the character's most recent reference refers to their current location. Mary moved to the bathroom. John went to the hallway. Where is Mary currently located?  Mary is currently located in the bathroom
+                    questionAnswer[0] = (f'Using the locations from the narrative, where is {questions[1]} currently located? {questions[1]} is currently located in the') # Using the locations from the narrative, where is {questions[1]} located? {questions[1]} is currently located in the
+                else:
+                    questionAnswer[0] = (f'{questions[1]} is in the') # currently located 
             elif val == 2:
                 qNum = int(match.group(1)) - adjust
                 object = match.group(2)
                 questions = ((qNum, object))
-                questionAnswer[0] = (f'Using the locations from the story, where is the {questions[1]} located? The {questions[1]} is located in the') # The %s is located in the || Where is the {questions[1]}? 
+                if(context):
+                    # "The following is a narrative with characters moving to different locations. The characters can pick up objects and bring the objects to new locations. Assume the object's most recent reference refers to their current location. "
+                    questionAnswer[0] = (f'Using the locations from the narrative, where is the {questions[1]} currently located? The {questions[1]} is located in the') # The %s is located in the || Where is the {questions[1]}? 
+                else:
+                    questionAnswer[0] = (f'The {questions[1]} is in the') # currently located 
+
             # elif val == 3: # three supporting facts
             #     object = match.group(2)
             #     loc2 = match.group(3)
@@ -104,23 +125,8 @@ def processQuestion(question):
             break
 
     return questionAnswer
-    
-filename = os.path.basename(argv[1]).replace(".txt", "")
 
-with open(argv[1]) as f:
-    narrative = f.readlines()
 
-try:
-    maxnarratives = int(argv[2])
-except:
-    maxnarratives = len(narrative)
-
-# GENERATE NARRATIVES
-if os.path.exists(filename):
-    shutil.rmtree(filename)
-os.mkdir(filename)
-os.chdir(filename)
-process()
 
 # GENERATE QUERIES
 
