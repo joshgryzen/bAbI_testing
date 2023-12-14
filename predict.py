@@ -1,5 +1,5 @@
 import transformers
-from transformers import BloomForCausalLM, BloomTokenizerFast, pipeline
+from transformers import AutoModelForCausalLM, pipeline, AutoTokenizer
 import torch
 import argparse
 import os
@@ -44,8 +44,19 @@ args = vars(parser.parse_args())
 # Process BABI file
 filename = os.path.basename(args["task"]).replace(".txt", "")
 
+
 process(args["task"], args["nsize"], args["context"])
-generator = pipeline("text-generation", model=args["model"], max_new_tokens=1)
+
+model_id = args["model"]
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True)
+
+# if args["model"] == "bigscience/bloom":
+#     generator = pipeline(
+#         "text-generation", model=args["model"], max_new_tokens=1, from_pt=True
+#     )
+# else:
+#     generator = pipeline("text-generation", model=args["model"], max_new_tokens=1)
 
 # model = BloomForCausalLM.from_pretrained(args['model'])
 # tokenizer = BloomTokenizerFast.from_pretrained(args['model'])
@@ -98,7 +109,15 @@ def predict():
 
         prompt += question
 
-        pred_full = generator(prompt)[0]["generated_text"]
+        inputs = tokenizer(prompt, return_tensors="pt")
+        pred_full = tokenizer.decode(
+            model.generate(
+                inputs["input_ids"],
+                max_length=len(inputs["input_ids"]) + 1,
+            )[0]
+        )
+
+        # pred_full = generator(prompt)[0]["generated_text"]
         pred = pred_full[pred_full.rfind(" ") :].strip()
 
         preds.append((prompt, questions[i], pred, answers[i]))
