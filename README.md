@@ -1,6 +1,6 @@
 # bAbI_testing
- 
-Run **predict.py** to test a hugging face model on the BABI dataset. 
+
+Run **predict.py** to test a hugging face model on the BABI dataset.
 
 Example running with **BLOOM**:
 
@@ -14,11 +14,17 @@ Example running with **OPT**:
 
 Other **OPT** sizes include: 125m, 350m, 1.3b, 2.7b, 6.7b, 13b, 30b, 66b
 
-
-optional parameters: 
+optional parameters:
 
 --nsize (int) for the size of the narrative
 
 --context (bool) can add context to the narrative
 
+To change the cache location use:
 
+export TRANSFORMERS_CACHE=/blabla/cache/
+
+or
+
+import os
+os.environ['TRANSFORMERS_CACHE'] = '/blabla/cache/'

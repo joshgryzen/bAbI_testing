@@ -1,8 +1,12 @@
+import os
+
+os.environ["HF_HOME"] = os.getcwd() + "/TransformerCACHE"
+
 import transformers
 from transformers import AutoModelForCausalLM, pipeline, AutoTokenizer
 import torch
 import argparse
-import os
+
 import csv
 
 from processBABI import *
@@ -48,30 +52,20 @@ filename = os.path.basename(args["task"]).replace(".txt", "")
 process(args["task"], args["nsize"], args["context"])
 
 model_id = args["model"]
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True)
+model_name = pred = args["model"][args["model"].rfind("/") + 1 :].strip()
 
-# if args["model"] == "bigscience/bloom":
-#     generator = pipeline(
-#         "text-generation", model=args["model"], max_new_tokens=1, from_pt=True
-#     )
-# else:
-#     generator = pipeline("text-generation", model=args["model"], max_new_tokens=1)
+device = torch.device("cpu")
+tokenizer = AutoTokenizer.from_pretrained(model_id, return_tensors="pt")
+model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True).to(
+    device
+)  # low_cpu_mem_usage=True
 
-# model = BloomForCausalLM.from_pretrained(args['model'])
-# tokenizer = BloomTokenizerFast.from_pretrained(args['model'])
-
-# Example usage with Beam Search
-"""
-
-prompt = "It was a dark and stormy night"
-result_length = 50
-inputs = tokenizer(prompt, return_tensors="pt")
-
-# Beam Search
-print(tokenizer.decode(model.generate(inputs["input_ids"], max_length = result_length, num_beams = 2, no_repeat_ngram_size = 2, early_stopping = True)[0]))
-
-"""
+# tokenizer = AutoTokenizer.from_pretrained(
+#     model_id, cache_dir="TransformerCACHE"
+# )
+# model = AutoModelForCausalLM.from_pretrained(
+#     model_id, trust_remote_code=True, cache_dir="TransformerCACHE"
+# )
 
 
 def predict():
@@ -110,10 +104,11 @@ def predict():
         prompt += question
 
         inputs = tokenizer(prompt, return_tensors="pt")
+        length = inputs["input_ids"].shape[1] + 1
         pred_full = tokenizer.decode(
             model.generate(
                 inputs["input_ids"],
-                max_length=len(inputs["input_ids"]) + 1,
+                max_length=length,
             )[0]
         )
 
@@ -132,8 +127,6 @@ def predict():
     accuracy /= len(answers)
 
     print(f"Accuracy: {accuracy}")
-
-    model_name = pred = args["model"][args["model"].rfind("/") + 1 :].strip()
 
     if not os.path.exists(model_name):
         os.mkdir(model_name)

@@ -29,33 +29,56 @@ def process(file, maxnarratives, context):
     os.mkdir(filename)
     os.chdir(filename)
 
-    i = 0
-    current = 0
-    narrativeName = "Narrative" + str(current + 1) + ".txt"
+    narrativeName = "Narrative" + str(1) + ".txt"
     narrativeFile = open(narrativeName, "w")
-    questionName = "Question" + str(current + 1) + ".txt"
+    questionName = "Question" + str(1) + ".txt"
     questionFile = open(questionName, "w")
+
+    # Count of the narratives
+    count = 0
+    # Current index
+    current = 0
+    # Previous seen question index
     seen = 0
-    while i < len(narrative):
-        line = narrative[i]
-        i += 1
+    # Count the num of lines, reset the narrative when the line num resets to 1
+    line_num = 0
+
+    while line_num < len(narrative):
+        line = narrative[line_num]
+        line_num += 1
+        next_line_num = (
+            int(re.match(r"^(\d+)", narrative[line_num + 1]).group(1))
+            if line_num + 1 < len(narrative)
+            and re.match(r"^(\d+)", narrative[line_num + 1])
+            else None
+        )
         if "?" in line:
             current += 1
+
+            # If our current index is greater than the previously seen question index, make new question file
             if seen < current:
+                count += 1
+                # Reset narratives
                 question = processQuestion(line, context)
                 print(question[0], file=questionFile)
                 print(question[1], file=questionFile, end="")
                 seen += 1
-                if i == len(narrative) or seen == maxnarratives:
+                if line_num == len(narrative) or count == maxnarratives:
                     break
                 narrativeFile.close()
                 questionFile.close()
-                narrativeName = "Narrative" + str(current + 1) + ".txt"
+                narrativeName = "Narrative" + str(count + 1) + ".txt"
                 narrativeFile = open(narrativeName, "w")
-                questionName = "Question" + str(current + 1) + ".txt"
+                questionName = "Question" + str(count + 1) + ".txt"
                 questionFile = open(questionName, "w")
-                i = 0
+
+                # If our line number is greater than the next line number that means the bAbI narrative starts over
+                if next_line_num and line_num > next_line_num:
+                    narrative = narrative[line_num:]
+                    seen = 0
+
                 current = 0
+                line_num = 0
         else:
             print(re.sub("^\d+ ", "", line), file=narrativeFile, end="")
 
@@ -133,3 +156,15 @@ def processQuestion(question, context):
             break
 
     return questionAnswer
+
+
+"""
+
+            if narrative_num > int(line[0]):
+                narrative_num = 1
+                narrativeFile.close()
+                narrativeName = "Narrative" + str(current + 1) + ".txt"
+                narrativeFile = open(narrativeName, "w")
+
+"""
+process("qa1_single-supporting-fact_train.txt", 20, False)
