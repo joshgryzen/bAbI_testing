@@ -159,15 +159,3 @@ def processQuestion(question, context):
             break
 
     return questionAnswer
-
-
-"""
-
-            if narrative_num > int(line[0]):
-                narrative_num = 1
-                narrativeFile.close()
-                narrativeName = "Narrative" + str(current + 1) + ".txt"
-                narrativeFile = open(narrativeName, "w")
-
-"""
-process("qa1_single-supporting-fact_train.txt", 1000, True)
