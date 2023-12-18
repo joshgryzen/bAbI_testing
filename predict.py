@@ -30,9 +30,9 @@ parser.add_argument(
 parser.add_argument(
     "-n",
     "--nsize",
-    default=100,
+    default=1000,
     type=int,
-    help="The maximum size of the narrative. Default set to 100",
+    help="The maximum size of the narrative. Default set to 1000",
 )
 parser.add_argument(
     "-c",

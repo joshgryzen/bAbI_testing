@@ -21,12 +21,15 @@ def process(file, maxnarratives, context):
     with open(file) as f:
         narrative = f.readlines()
 
-    filename = os.path.basename(file).replace(".txt", "")
+    filename = (
+        "WITH_CONTEXT_" + os.path.basename(file).replace(".txt", "")
+        if context
+        else os.path.basename(file).replace(".txt", "")
+    )
 
     # GENERATE NARRATIVES
-    if os.path.exists(filename):
-        shutil.rmtree(filename)
-    os.mkdir(filename)
+    if not os.path.exists(filename):
+        os.mkdir(filename)
     os.chdir(filename)
 
     narrativeName = "Narrative" + str(1) + ".txt"
@@ -167,4 +170,4 @@ def processQuestion(question, context):
                 narrativeFile = open(narrativeName, "w")
 
 """
-process("qa1_single-supporting-fact_train.txt", 20, False)
+process("qa1_single-supporting-fact_train.txt", 1000, True)

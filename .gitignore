@@ -4,4 +4,8 @@
 
 /qa2_two-supporting-facts_train
 
+/WITH_CONTEXT_qa1_single-supporting-fact_train
+
+/WITH_CONTEXT_qa2_two-supporting-facts_train
+
 /TransformerCACHE
