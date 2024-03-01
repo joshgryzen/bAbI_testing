@@ -51,6 +51,14 @@ parser.add_argument(
     type=bool,
     help="Option to pass in additional context before each narrative. Default set to false",
 )
+parser.add_argument(
+    "-at",
+    "--access_token",
+    nargs="?",
+    default="",
+    type=str,
+    help="Hugging face access token",
+)
 
 args = vars(parser.parse_args())
 # Process BABI file
@@ -83,7 +91,7 @@ quantization_config = BitsAndBytesConfig(llm_int8_enable_fp32_cpu_offload=True)
 tokenizer = AutoTokenizer.from_pretrained(
     model_id,
     return_tensors="pt",
-    token="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",
+    token=args["access_token"],
 )
 model = AutoModelForCausalLM.from_pretrained(
     model_id,
@@ -92,7 +100,7 @@ model = AutoModelForCausalLM.from_pretrained(
     offload_folder="offload",
     offload_state_dict=True,
     quantization_config=quantization_config,
-    token="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",
+    token=args["access_token"],
 )
 
 # Wrap the model with DataParallel if there are multiple GPU's
