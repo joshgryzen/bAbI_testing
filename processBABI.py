@@ -28,8 +28,9 @@ def process(file, maxnarratives, context):
     )
 
     # GENERATE NARRATIVES
-    if not os.path.exists(filename):
-        os.mkdir(filename)
+    if os.path.exists(filename):
+        shutil.rmtree(filename)
+    os.mkdir(filename)
     os.chdir(filename)
 
     narrativeName = "Narrative" + str(1) + ".txt"
@@ -118,9 +119,9 @@ def processQuestion(question, context):
                 questions = (qNum, object)
                 if context:
                     # The following is a narrative with characters moving to different locations. Assume the character's most recent reference refers to their current location. Mary moved to the bathroom. John went to the hallway. Where is Mary currently located?  Mary is currently located in the bathroom
-                    questionAnswer[
-                        0
-                    ] = f"Using the locations from the narrative, where is {questions[1]} currently located? {questions[1]} is currently located in the"  # Using the locations from the narrative, where is {questions[1]} located? {questions[1]} is currently located in the
+                    questionAnswer[0] = (
+                        f"Using the locations from the narrative, where is {questions[1]} currently located? {questions[1]} is currently located in the"  # Using the locations from the narrative, where is {questions[1]} located? {questions[1]} is currently located in the
+                    )
                 else:
                     questionAnswer[0] = f"{questions[1]} is in the"  # currently located
             elif val == 2:
@@ -129,13 +130,13 @@ def processQuestion(question, context):
                 questions = (qNum, object)
                 if context:
                     # "The following is a narrative with characters moving to different locations. The characters can pick up objects and bring the objects to new locations. Assume the object's most recent reference refers to their current location. "
-                    questionAnswer[
-                        0
-                    ] = f"Using the locations from the narrative, where is the {questions[1]} currently located? The {questions[1]} is located in the"  # The %s is located in the || Where is the {questions[1]}?
+                    questionAnswer[0] = (
+                        f"Using the locations from the narrative, where is the {questions[1]} currently located? The {questions[1]} is located in the"  # The %s is located in the || Where is the {questions[1]}?
+                    )
                 else:
-                    questionAnswer[
-                        0
-                    ] = f"The {questions[1]} is in the"  # currently located
+                    questionAnswer[0] = (
+                        f"The {questions[1]} is in the"  # currently located
+                    )
 
             # elif val == 3: # three supporting facts
             #     object = match.group(2)

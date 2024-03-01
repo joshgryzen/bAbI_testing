@@ -3,9 +3,17 @@ import os
 os.environ["HF_HOME"] = os.getcwd() + "/TransformerCACHE"
 
 import transformers
-from transformers import AutoModelForCausalLM, pipeline, AutoTokenizer
+from transformers import (
+    AutoModelForCausalLM,
+    pipeline,
+    AutoTokenizer,
+    AutoConfig,
+    BitsAndBytesConfig,
+)
 import torch
 import argparse
+from torch.nn import DataParallel
+from accelerate import infer_auto_device_map, init_empty_weights
 
 import csv
 
@@ -54,18 +62,56 @@ process(args["task"], args["nsize"], args["context"])
 model_id = args["model"]
 model_name = pred = args["model"][args["model"].rfind("/") + 1 :].strip()
 
-device = torch.device("cpu")
-tokenizer = AutoTokenizer.from_pretrained(model_id, return_tensors="pt")
-model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True).to(
-    device
-)  # low_cpu_mem_usage=True
+# Assuming multiple GPUs available
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# tokenizer = AutoTokenizer.from_pretrained(
-#     model_id, cache_dir="TransformerCACHE"
-# )
+# print(torch.cuda.device_count())
+# print(torch.cuda.current_device())
+# print(torch.cuda.get_device_name(torch.cuda.current_device()))
+
+checkpoint = model_id
+config = AutoConfig.from_pretrained(model_id)
+
+with init_empty_weights():
+    model = AutoModelForCausalLM.from_config(config)
+
+model.tie_weights()
+device_map = infer_auto_device_map(model, no_split_module_classes=["Block"])
+
+device_map["model.decoder.layers.37"] = "disk"
+quantization_config = BitsAndBytesConfig(llm_int8_enable_fp32_cpu_offload=True)
+
 # model = AutoModelForCausalLM.from_pretrained(
-#     model_id, trust_remote_code=True, cache_dir="TransformerCACHE"
+#     model_id,
+#     device_map=device_map,
+#     offload_folder="offload",
+#     offload_state_dict=True,
+#     quantization_config = quantization_config,
+#     # load_in_8bit=True,
+#     # load_in_8bit_fp32_cpu_offload=True
+#     # torch_dtype=torch.float32,
 # )
+
+tokenizer = AutoTokenizer.from_pretrained(
+    model_id,
+    return_tensors="pt",
+    token="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",
+)
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    trust_remote_code=True,
+    device_map=device_map,
+    offload_folder="offload",
+    offload_state_dict=True,
+    quantization_config=quantization_config,
+    # load_in_8bit=True,
+    # device_map="auto",
+    token="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",
+)
+
+# Wrap the model with DataParallel
+if torch.cuda.device_count() > 1:
+    model = DataParallel(model)
 
 
 def predict():
@@ -104,6 +150,7 @@ def predict():
         prompt += question
 
         inputs = tokenizer(prompt, return_tensors="pt")
+        inputs["input_ids"] = inputs["input_ids"].to(device)
         length = inputs["input_ids"].shape[1] + 1
         pred_full = tokenizer.decode(
             model.generate(
@@ -117,6 +164,7 @@ def predict():
 
         preds.append((prompt, questions[i], pred, answers[i]))
 
+        # TODO: if capital letter
         if pred == answers[i]:
             accuracy += 1.0
 

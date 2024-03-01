@@ -1,0 +1,5 @@
+Filename,Total Accuracy,Story Location Accuracy,Missing Locations,Random Baseline
+opt-2.7b_qa1_single-supporting-fact_train_Preds.csv,0.612,0.998,[],0.16666666666666666
+opt-2.7b_qa2_two-supporting-facts_train_Preds.csv,0.27,0.704,[],0.16666666666666666
+WITH_CONTEXT_opt-2.7b_qa1_single-supporting-fact_train_Preds.csv,0.59,1.0,[],0.16666666666666666
+WITH_CONTEXT_opt-2.7b_qa2_two-supporting-facts_train_Preds.csv,0.292,0.983,[],0.16666666666666666

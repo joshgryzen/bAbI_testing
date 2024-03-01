@@ -1,0 +1,5 @@
+Filename,Total Accuracy,Story Location Accuracy,Missing Locations,Random Baseline
+bloomz-560m_qa1_single-supporting-fact_train_Preds.csv,0.399,0.933,['hallway'],0.16666666666666666
+bloomz-560m_qa2_two-supporting-facts_train_Preds.csv,0.26,0.905,['hallway'],0.16666666666666666
+WITH_CONTEXT_bloomz-560m_qa1_single-supporting-fact_train_Preds.csv,0.297,0.851,['hallway'],0.16666666666666666
+WITH_CONTEXT_bloomz-560m_qa2_two-supporting-facts_train_Preds.csv,0.279,0.928,['hallway'],0.16666666666666666
