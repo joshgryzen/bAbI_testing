@@ -62,35 +62,23 @@ process(args["task"], args["nsize"], args["context"])
 model_id = args["model"]
 model_name = pred = args["model"][args["model"].rfind("/") + 1 :].strip()
 
-# Assuming multiple GPUs available
+# Setting the device to cuda if there are GPU's available, CPU otherwise
 device = "cuda" if torch.cuda.is_available() else "cpu"
-
-# print(torch.cuda.device_count())
-# print(torch.cuda.current_device())
-# print(torch.cuda.get_device_name(torch.cuda.current_device()))
 
 checkpoint = model_id
 config = AutoConfig.from_pretrained(model_id)
 
+# Load the model with empty weights
+# TODO: experiment to see if this impacts performance.
 with init_empty_weights():
     model = AutoModelForCausalLM.from_config(config)
 
 model.tie_weights()
 device_map = infer_auto_device_map(model, no_split_module_classes=["Block"])
 
+# TODO: experiment with the device map and quantinizaation to see if it impacts performance.
 device_map["model.decoder.layers.37"] = "disk"
 quantization_config = BitsAndBytesConfig(llm_int8_enable_fp32_cpu_offload=True)
-
-# model = AutoModelForCausalLM.from_pretrained(
-#     model_id,
-#     device_map=device_map,
-#     offload_folder="offload",
-#     offload_state_dict=True,
-#     quantization_config = quantization_config,
-#     # load_in_8bit=True,
-#     # load_in_8bit_fp32_cpu_offload=True
-#     # torch_dtype=torch.float32,
-# )
 
 tokenizer = AutoTokenizer.from_pretrained(
     model_id,
@@ -104,12 +92,10 @@ model = AutoModelForCausalLM.from_pretrained(
     offload_folder="offload",
     offload_state_dict=True,
     quantization_config=quantization_config,
-    # load_in_8bit=True,
-    # device_map="auto",
     token="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",
 )
 
-# Wrap the model with DataParallel
+# Wrap the model with DataParallel if there are multiple GPU's
 if torch.cuda.device_count() > 1:
     model = DataParallel(model)
 
@@ -158,13 +144,11 @@ def predict():
                 max_length=length,
             )[0]
         )
-
-        # pred_full = generator(prompt)[0]["generated_text"]
         pred = pred_full[pred_full.rfind(" ") :].strip()
 
         preds.append((prompt, questions[i], pred, answers[i]))
 
-        # TODO: if capital letter
+        # TODO: handle discrepancies in capitalization
         if pred == answers[i]:
             accuracy += 1.0
 
