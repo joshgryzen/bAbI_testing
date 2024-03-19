@@ -136,7 +136,10 @@ def predict():
     for i in range(0, len(narratives)):
         if args["task"] == "qa1_single-supporting-fact_train.txt":
             context = "The following is a narrative with characters moving to different locations. Assume the character's most recent reference refers to their current location. "
-        elif args["task"] == "qa2_two-supporting-facts_train.txt":
+        elif (
+            args["task"] == "qa2_two-supporting-facts_train.txt"
+            or args["task"] == "qa3_three-supporting-facts_train.txt"
+        ):
             context = "The following is a narrative with characters moving to different locations. The characters can pick up objects and bring the objects to new locations. Assume the object's most recent reference refers to their current location. "
         prompt = context + narratives[i] if args["context"] else narratives[i]
         question = questions[i]

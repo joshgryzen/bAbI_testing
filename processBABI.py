@@ -105,7 +105,8 @@ def processQuestion(question, context):
     regexes = [
         (one_supp_regex, 1),
         (two_supp_regex, 2),
-    ]  # ,(three_supp_regex,3),(yes_no_regex,6),(counting_regex,7),(lists_regex,8)
+        (three_supp_regex, 3),
+    ]  # (yes_no_regex,6),(counting_regex,7),(lists_regex,8)
 
     for r in regexes:
         regex = r[0]
@@ -138,10 +139,19 @@ def processQuestion(question, context):
                         f"The {questions[1]} is in the"  # currently located
                     )
 
-            # elif val == 3: # three supporting facts
-            #     object = match.group(2)
-            #     loc2 = match.group(3)
-            #     questions = ((object, loc2))
+            elif val == 3:  # three supporting facts
+                object = match.group(2)
+                loc2 = match.group(3)
+                questions = (object, loc2)
+                if context:
+                    # "The following is a narrative with characters moving to different locations. The characters can pick up objects and bring the objects to new locations. Assume the object's most recent reference refers to their current location. "
+                    questionAnswer[0] = (
+                        f"Using the locations from the narrative, where was the {questions[0]} located before it was in the {questions[1]}? Before the {questions[0]} was in the {questions[1]}, the {questions[0]} was in the"  # The %s is located in the || Where is the {questions[1]}?
+                    )
+                else:
+                    questionAnswer[0] = (
+                        f"Before the {questions[0]} was in the {questions[1]}, the {questions[0]} was in the"
+                    )
             # elif val == 6: # yes no
             #     lineNum = int(match.group(1)) - adjust
             #     person = match.group(2).lower()
@@ -160,3 +170,7 @@ def processQuestion(question, context):
             break
 
     return questionAnswer
+
+
+# process("qa3_three-supporting-facts_train.txt", 10, False)
+# process("qa2_two-supporting-facts_train.txt", 10, False)
