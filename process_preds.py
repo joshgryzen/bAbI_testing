@@ -111,7 +111,7 @@ def calculateStoryLocationAccuracy():
                         f"pred is a substring of the answer\npred: {predictions[j]}, answer: {answers[j]}"
                     )
                     accuracy += 1
-                    score += 1
+                    # score += 1
             accuracies.append(accuracy / len(predictions))
             location_accuracy = score / len(predictions)
             random_baseline = 1 / len(locations)
@@ -183,7 +183,7 @@ def getSimularities():
         print(f"Average simularity score of {df_names[i]}: {averages[i]}")
 
 
-os.chdir("predictions/bloom-3b")
+os.chdir("predictions/bloom")
 filelist = os.listdir()
 
 dfs = []

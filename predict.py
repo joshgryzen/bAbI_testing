@@ -73,20 +73,7 @@ model_name = pred = args["model"][args["model"].rfind("/") + 1 :].strip()
 # Setting the device to cuda if there are GPU's available, CPU otherwise
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-checkpoint = model_id
-config = AutoConfig.from_pretrained(model_id)
-
-# Load the model with empty weights
-# TODO: experiment to see if this impacts performance.
-with init_empty_weights():
-    model = AutoModelForCausalLM.from_config(config)
-
-model.tie_weights()
-device_map = infer_auto_device_map(model, no_split_module_classes=["Block"])
-
-# TODO: experiment with the device map and quantinizaation to see if it impacts performance.
-device_map["model.decoder.layers.37"] = "disk"
-quantization_config = BitsAndBytesConfig(llm_int8_enable_fp32_cpu_offload=True)
+# quantization_config = BitsAndBytesConfig(llm_int8_enable_fp32_cpu_offload=True)
 
 tokenizer = AutoTokenizer.from_pretrained(
     model_id,
@@ -96,11 +83,9 @@ tokenizer = AutoTokenizer.from_pretrained(
 model = AutoModelForCausalLM.from_pretrained(
     model_id,
     trust_remote_code=True,
-    device_map=device_map,
-    offload_folder="offload",
-    offload_state_dict=True,
-    quantization_config=quantization_config,
+    device_map="auto",
     token=args["access_token"],
+    # low_cpu_mem_usage=True,
 )
 
 # Wrap the model with DataParallel if there are multiple GPU's
@@ -134,11 +119,16 @@ def predict():
     os.chdir("predictions")
 
     for i in range(0, len(narratives)):
-        if args["task"] == "qa1_single-supporting-fact_train.txt":
+        if (
+            args["task"] == "qa1_single-supporting-fact_train.txt"
+            or args["task"] == "qa1_single-supporting-fact_test.txt"
+        ):
             context = "The following is a narrative with characters moving to different locations. Assume the character's most recent reference refers to their current location. "
         elif (
             args["task"] == "qa2_two-supporting-facts_train.txt"
             or args["task"] == "qa3_three-supporting-facts_train.txt"
+            or args["task"] == "qa2_two-supporting-facts_test.txt"
+            or args["task"] == "qa3_three-supporting-facts_test.txt"
         ):
             context = "The following is a narrative with characters moving to different locations. The characters can pick up objects and bring the objects to new locations. Assume the object's most recent reference refers to their current location. "
         prompt = context + narratives[i] if args["context"] else narratives[i]
@@ -148,7 +138,9 @@ def predict():
 
         inputs = tokenizer(prompt, return_tensors="pt")
         inputs["input_ids"] = inputs["input_ids"].to(device)
-        length = inputs["input_ids"].shape[1] + 1
+
+        # TODO: Test if setting to 2 tokens fixes compound words
+        length = inputs["input_ids"].shape[1] + 2
         pred_full = tokenizer.decode(
             model.generate(
                 inputs["input_ids"],

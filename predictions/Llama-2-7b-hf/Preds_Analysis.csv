@@ -1,0 +1,2 @@
+Filename,Total Accuracy,Story Location Accuracy,Missing Locations,Random Baseline
+Llama-2-7b-hf_qa1_single-supporting-fact_train_Preds.csv,0.532,0.55,"['hallway', 'bedroom', 'bathroom']",0.16666666666666666
