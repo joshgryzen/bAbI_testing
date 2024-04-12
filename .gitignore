@@ -12,4 +12,16 @@
 
 /WITH_CONTEXT_qa3_three-supporting-facts_train
 
+/qa1_single-supporting-fact_test
+
+/qa2_two-supporting-facts_test
+
+/WITH_CONTEXT_qa1_single-supporting-fact_test
+
+/WITH_CONTEXT_qa2_two-supporting-facts_test
+
+/qa3_three-supporting-facts_test
+
+/WITH_CONTEXT_qa3_three-supporting-facts_test
+
 /TransformerCACHE
