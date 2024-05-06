@@ -5,10 +5,21 @@ os.environ["HF_HOME"] = os.getcwd() + "/TransformerCACHE"
 
 import argparse
 from huggingface_hub import InferenceClient
+from tenacity import retry, stop_after_attempt, wait_fixed
+
+from handle_http_429_errors import (
+    retry_if_http_429_error,
+    wait_for_retry_after_header
+)
 
 import csv
 
 from processBABI import *
+
+@retry(
+    retry=retry_if_http_429_error(),
+    wait=wait_for_retry_after_header(fallback=wait_fixed(1))
+)
 
 # command line args, narrative text file name, size of model -> defaults to 560m
 parser = argparse.ArgumentParser()
@@ -107,7 +118,8 @@ def predict():
         prompt += question
 
         # TODO: handle rate limit reached and save checkpoint
-        pred = inference.text_generation(prompt, model=model, max_new_tokens=2).strip().replace(".", "")
+        try: 
+            pred = inference.text_generation(prompt, model=model, max_new_tokens=2).strip().replace(".", "")
 
         # # load the json and get the string result
         # pred_full = json.loads(pred_result)[0]["generated_text"]
