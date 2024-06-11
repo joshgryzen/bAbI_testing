@@ -5,11 +5,15 @@ os.environ["HF_HOME"] = os.getcwd() + "/TransformerCACHE"
 import transformers
 from transformers import (
     AutoModelForCausalLM,
+    pipeline,
     AutoTokenizer,
+    AutoConfig,
+    BitsAndBytesConfig,
 )
 import torch
 import argparse
 from torch.nn import DataParallel
+from accelerate import infer_auto_device_map, init_empty_weights
 
 import csv
 
@@ -74,13 +78,13 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 tokenizer = AutoTokenizer.from_pretrained(
     model_id,
     return_tensors="pt",
-    # token=args["access_token"],
+    token="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",
 )
 model = AutoModelForCausalLM.from_pretrained(
     model_id,
     trust_remote_code=True,
     device_map="auto",
-    # token=args["access_token"],
+    token="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",
     # low_cpu_mem_usage=True,
 )
 
@@ -147,6 +151,7 @@ def predict():
 
         preds.append((prompt, questions[i], pred, answers[i]))
 
+        # TODO: handle discrepancies in capitalization
         if pred == answers[i]:
             accuracy += 1.0
 

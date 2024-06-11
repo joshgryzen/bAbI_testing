@@ -25,7 +25,7 @@ def getStats(task):
 
                 # Read the contents of the file
                 with open(file_path, "r") as file:
-                    content = file.read()
+                    content = file.read().split("\n")
 
                 # Update statistics
                 file_length = len(content)
@@ -49,4 +49,4 @@ def getStats(task):
         print(f"Total number of text files: {num_files}")
 
 
-getStats("qa1_single-supporting-fact_train")
+getStats("qa3_three-supporting-facts_test")

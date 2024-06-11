@@ -173,4 +173,4 @@ def processQuestion(question, context):
 
 
 # process("qa3_three-supporting-facts_train.txt", 10, False)
-# process("qa2_two-supporting-facts_train.txt", 10, False)
+# process("qa3_three-supporting-facts_test.txt", 1000, False)
