@@ -146,15 +146,16 @@ accuracy /= len(answers)
 
 print(f"Accuracy: {accuracy}")
 
-if not os.path.exists(model):
-    os.mkdir(model)
+model_name = pred = args["model"][args["model"].rfind("/") + 1 :].strip()
+if not os.path.exists(model_name):
+    os.mkdir(model_name)
 
-os.chdir(model)
+os.chdir(model_name)
 
 fname = (
-    f"WITH_CONTEXT_{model}_{filename}_Preds.csv"
+    f"WITH_CONTEXT_{model_name}_{filename}_Preds.csv"
     if args["context"]
-    else f"{model}_{filename}_Preds.csv"
+    else f"{model_name}_{filename}_Preds.csv"
 )
 
 with open(fname, "w") as out:
