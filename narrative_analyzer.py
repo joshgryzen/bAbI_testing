@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Load data from CSV into a DataFrame
-csv_file = "path_to_your_csv_file.csv"
+csv_file = "predictions\Llama-2-70b-hf\Llama-2-70b-hf_qa1_single-supporting-fact_train_Preds.csv"
 df = pd.read_csv(csv_file)
 
 # Assuming your CSV file has columns like 'Prompt', 'Prediction', 'Correct_Answer'
@@ -37,7 +37,7 @@ df["Length_Range"] = df["Narrative_Length"].apply(categorize_length)
 accuracy_by_range = []
 
 for range_label, group in df.groupby("Length_Range"):
-    correct = (group["Prediction"] == group["Correct_Answer"]).sum()
+    correct = (group["Prediction"] == group["Answer"]).sum()
     total = len(group)
     accuracy = correct / total
     accuracy_by_range.append({"Length_Range": range_label, "Accuracy": accuracy})
